@@ -1,0 +1,67 @@
+services:
+
+  # ── Python FastAPI AI Service ───────────────────────────────────────────────
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    container_name: rag_ai_service
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - MONGODB_URI=${MONGODB_URI}
+      - MONGODB_DB_NAME=${MONGODB_DB_NAME:-rag_support_agent}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - GROQ_MODEL=${GROQ_MODEL:-llama3-8b-8192}
+      - EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+      - CHUNK_SIZE=${CHUNK_SIZE:-512}
+      - CHUNK_OVERLAP=${CHUNK_OVERLAP:-64}
+      - TOP_K=${TOP_K:-3}
+      - MIN_SCORE=${MIN_SCORE:-0.70}
+      - NUM_CANDIDATES=${NUM_CANDIDATES:-100}
+    volumes:
+      - ai_uploads:/tmp/rag_uploads
+      - hf_cache:/tmp/hf_cache
+    ports:
+      - "8000:8000"
+    networks:
+      - rag_net
+    healthcheck:
+      # test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s   # extra time for HF model download on first run
+
+  # ── Node.js Express Gateway ─────────────────────────────────────────────────
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    container_name: rag_gateway
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - PORT=3000
+      - MONGODB_URI=${MONGODB_URI}
+      - MONGODB_DB_NAME=${MONGODB_DB_NAME:-rag_support_agent}
+      - FASTAPI_URL=http://ai-service:8000
+      - NODE_ENV=production
+    ports:
+      - "3000:3000"
+    networks:
+      - rag_net
+    depends_on:
+      ai-service:
+        condition: service_healthy
+
+networks:
+  rag_net:
+    driver: bridge
+
+volumes:
+  ai_uploads:
+  hf_cache:
