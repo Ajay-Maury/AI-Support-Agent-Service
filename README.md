@@ -102,11 +102,37 @@ rag-support-system/
 - A free [MongoDB Atlas](https://www.mongodb.com/cloud/atlas/register) account
 - A free [Groq](https://console.groq.com) API key
 
+### Environment variables (.env)
+
+Add the following keys to your `.env` file. Keys in ALL CAPS are the environment variable names used by Docker and examples below show recommended defaults.
+
+- `GROQ_API_KEY`: (required) your Groq API key
+- `MONGODB_URI`: (required) MongoDB Atlas connection string
+- `MONGODB_DB_NAME`: database name (default: `rag_support_agent`)
+- `GROQ_MODEL`: Groq model to use (default: `llama3-8b-8192`)
+- `EMBEDDING_MODEL`: local HF embedding model (default: `sentence-transformers/all-MiniLM-L6-v2`)
+- `CHUNK_SIZE`: document chunk size (default: `512`)
+- `CHUNK_OVERLAP`: chunk overlap (default: `64`)
+- `TOP_K`: top-k retrieval (default: `3`)
+- `MIN_SCORE`: retrieval min score (default: `0.70`)
+- `NUM_CANDIDATES`: retrieval candidate pool (default: `100`)
+
+Example `.env` (minimum):
+
+```
+MONGODB_URI=mongodb+srv://<user>:<pw>@cluster0.mongodb.net
+GROQ_API_KEY=gsk_XXXXXXXXXXXXXXXX
+GROQ_MODEL=llama3-8b-8192
+MIN_SCORE=0.70
+```
+
+Note: the Python service reads settings via `pydantic-settings` and accepts the same variable names in lower/upper case. The defaults listed above match the values in `ai-service/app/core/config.py`.
+
 ### Step 1 — Clone and configure
 
 ```bash
-git clone https://github.com/your-username/rag-support-system.git
-cd rag-support-system
+git clone https://github.com/Ajay-Maury/AI-Support-Agent-Service.git
+cd AI-Support-Agent-Service
 cp .env.example .env
 ```
 
@@ -236,7 +262,7 @@ Edit `GROQ_MODEL` in `.env`:
 
 | Model | Context | Best for |
 |---|---|---|
-| `llama3-8b-8192` | 8K | Default — fast, good quality |
+| llama-3.1-8b-instant | 8b | Default — fast, good quality |
 | `llama3-70b-8192` | 8K | Better reasoning, slower |
 | `mixtral-8x7b-32768` | 32K | Long documents |
 | `gemma2-9b-it` | 8K | Alternative, Google model |
@@ -263,4 +289,4 @@ No code changes required — restart with `docker compose up`.
 
 **Groq rate limit errors**
 - Free tier: ~30 requests/min. For testing, add a small delay between calls.
-- Switch to `llama3-8b-8192` (fastest) if hitting limits on larger models.
+- Switch to `llama-3.1-8b-instant` (fastest) if hitting limits on larger models.

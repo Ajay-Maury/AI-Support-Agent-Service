@@ -21,9 +21,7 @@ async def query_non_streaming(body: QueryRequest):
     token_stream, chunks = await run_query(body.question, db)
 
     full_answer = ""
-    print(f"Collecting tokens for non-streaming response... {token_stream}")
     async for token in token_stream:
-        print(f"Received token: {token}")
         full_answer += token
 
     sources = [
@@ -53,8 +51,6 @@ async def query_streaming(body: QueryRequest):
     """
     db = get_db()
     token_stream, chunks = await run_query(body.question, db)
-
-    print(f"Starting token stream for streaming response... {token_stream}")
 
     async def event_generator():
         async for token in token_stream:
