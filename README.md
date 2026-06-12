@@ -17,7 +17,7 @@ React Frontend  ──POST /api/chat/stream──►  Express Gateway (Node.js)
                                                                          │
                                                                Atlas Vector Search
                                                                          │
-                                                               Groq LLM (llama3-8b)
+                                                               Groq LLM (llama-3.1-8b-instant)
                                                                          │
                                                                ◄── SSE tokens ──
 ```
@@ -32,7 +32,7 @@ React Frontend  ──POST /api/chat/stream──►  Express Gateway (Node.js)
 
 ### Design decisions
 
-- **Groq instead of OpenAI** — free-tier API with fast inference. `llama3-8b-8192` provides good quality with generous rate limits.
+- **Groq instead of OpenAI** — free-tier API with fast inference. `llama-3.1-8b-instant` provides good quality with generous rate limits.
 - **Local embeddings (sentence-transformers/all-MiniLM-L6-v2)** — 384-dimensional vectors, runs on CPU, zero cost, no API key required. The model is baked into the Docker image.
 - **Express as gateway, not just proxy** — Express owns session state, input validation (Zod), and SSE piping. FastAPI focuses purely on AI logic.
 - **Streaming via SSE** — tokens stream from Groq → FastAPI → Express → React. First token appears in < 1 second.
@@ -109,7 +109,7 @@ Add the following keys to your `.env` file. Keys in ALL CAPS are the environment
 - `GROQ_API_KEY`: (required) your Groq API key
 - `MONGODB_URI`: (required) MongoDB Atlas connection string
 - `MONGODB_DB_NAME`: database name (default: `rag_support_agent`)
-- `GROQ_MODEL`: Groq model to use (default: `llama3-8b-8192`)
+- `GROQ_MODEL`: Groq model to use (default: `llama-3.1-8b-instant`)
 - `EMBEDDING_MODEL`: local HF embedding model (default: `sentence-transformers/all-MiniLM-L6-v2`)
 - `CHUNK_SIZE`: document chunk size (default: `512`)
 - `CHUNK_OVERLAP`: chunk overlap (default: `64`)
@@ -122,7 +122,7 @@ Example `.env` (minimum):
 ```
 MONGODB_URI=mongodb+srv://<user>:<pw>@cluster0.mongodb.net
 GROQ_API_KEY=gsk_XXXXXXXXXXXXXXXX
-GROQ_MODEL=llama3-8b-8192
+GROQ_MODEL=llama-3.1-8b-instant
 MIN_SCORE=0.70
 ```
 
@@ -262,7 +262,7 @@ Edit `GROQ_MODEL` in `.env`:
 
 | Model | Context | Best for |
 |---|---|---|
-| llama-3.1-8b-instant | 8b | Default — fast, good quality |
+| `llama-3.1-8b-instant` | 8b | Default — fast, good quality |
 | `llama3-70b-8192` | 8K | Better reasoning, slower |
 | `mixtral-8x7b-32768` | 32K | Long documents |
 | `gemma2-9b-it` | 8K | Alternative, Google model |
