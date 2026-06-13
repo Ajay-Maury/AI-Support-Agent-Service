@@ -225,7 +225,7 @@ curl -N http://localhost:3000/api/chat/stream \
 
 | Method | Path | Description |
 |---|---|---|
-| `GET` | `/health` | Gateway health check |
+| `GET` | `/health` | Gateway health check; also verifies the FastAPI AI service `/health` endpoint |
 | `POST` | `/api/chat` | Ask a question (JSON response) |
 | `POST` | `/api/chat/stream` | Ask a question (SSE streaming) |
 | `GET` | `/api/chat/:id` | Load session history by session_id |
